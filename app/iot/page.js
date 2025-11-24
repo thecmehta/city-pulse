@@ -35,7 +35,9 @@ export default function IoTSimulator() {
                 id: Date.now(),
                 time: new Date().toLocaleTimeString(),
                 status: res.ok ? 'OK' : 'ERR',
-                details: res.ok ? `Speed: ${result.speed} | Traffic: ${result.trafficLevel}` : result.error,
+                details: res.ok
+                    ? `Sent => speed:${data.speed}, temp:${data.temperature}°C, hum:${data.humidity}%, weather:${data.weather}, time:${data.timeOfDay} | Received => traffic:${result.trafficLevel}, pollution:${result.pollutionLevel}`
+                    : `Error: ${result.error}`,
             };
 
             setLogs(prev => [logEntry, ...prev].slice(0, 20));
@@ -164,8 +166,8 @@ export default function IoTSimulator() {
                             <button
                                 onClick={() => setIsSimulating(!isSimulating)}
                                 className={`flex-1 flex items-center justify-center rounded-xl font-semibold transition-all border ${isSimulating
-                                        ? 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20 hover:bg-[#EF4444]/20'
-                                        : 'bg-[#1E293B] text-[#F8FAFC] border-[#334155] hover:bg-[#334155]'
+                                    ? 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20 hover:bg-[#EF4444]/20'
+                                    : 'bg-[#1E293B] text-[#F8FAFC] border-[#334155] hover:bg-[#334155]'
                                     }`}
                             >
                                 {isSimulating ? (
