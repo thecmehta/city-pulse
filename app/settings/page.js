@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react';
 import { Save, Settings as SettingsIcon, AlertCircle, Sliders, Database } from 'lucide-react';
 
 export default function Settings() {
-    const [config, setConfig] = useState(null);
+    const [config, setConfig] = useState({
+        population: 0,
+        vehicleCount: 0,
+        thresholds: {
+            traffic: { highSpeed: 0, lowSpeed: 0 },
+            pollution: { highTemp: 0, highHumidity: 0 }
+        }
+    });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -59,8 +66,6 @@ export default function Settings() {
         </div>
     );
 
-    if (!config) return null;
-
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="card">
@@ -93,7 +98,7 @@ export default function Settings() {
                                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Population</label>
                                 <input
                                     type="number"
-                                    value={config.population || 0}
+                                    value={config.population}
                                     onChange={(e) => updateConfig('population', e.target.value)}
                                     className="input-field"
                                 />
@@ -102,7 +107,7 @@ export default function Settings() {
                                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Registered Vehicles</label>
                                 <input
                                     type="number"
-                                    value={config.vehicleCount || 0}
+                                    value={config.vehicleCount}
                                     onChange={(e) => updateConfig('vehicleCount', e.target.value)}
                                     className="input-field"
                                 />
@@ -125,7 +130,7 @@ export default function Settings() {
                                     <p className="text-xs text-[#64748B] mb-2">Speeds above this = LOW traffic</p>
                                     <input
                                         type="number"
-                                        value={config.thresholds?.traffic?.highSpeed || 0}
+                                        value={config.thresholds.traffic.highSpeed}
                                         onChange={(e) => updateConfig('thresholds.traffic.highSpeed', e.target.value)}
                                         className="input-field"
                                     />
@@ -135,7 +140,7 @@ export default function Settings() {
                                     <p className="text-xs text-[#64748B] mb-2">Speeds below this = HIGH traffic</p>
                                     <input
                                         type="number"
-                                        value={config.thresholds?.traffic?.lowSpeed || 0}
+                                        value={config.thresholds.traffic.lowSpeed}
                                         onChange={(e) => updateConfig('thresholds.traffic.lowSpeed', e.target.value)}
                                         className="input-field"
                                     />
@@ -148,7 +153,7 @@ export default function Settings() {
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">High Temp Threshold (°C)</label>
                                     <input
                                         type="number"
-                                        value={config.thresholds?.pollution?.highTemp || 0}
+                                        value={config.thresholds.pollution.highTemp}
                                         onChange={(e) => updateConfig('thresholds.pollution.highTemp', e.target.value)}
                                         className="input-field"
                                     />
@@ -157,7 +162,7 @@ export default function Settings() {
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">High Humidity Threshold (%)</label>
                                     <input
                                         type="number"
-                                        value={config.thresholds?.pollution?.highHumidity || 0}
+                                        value={config.thresholds.pollution.highHumidity}
                                         onChange={(e) => updateConfig('thresholds.pollution.highHumidity', e.target.value)}
                                         className="input-field"
                                     />
