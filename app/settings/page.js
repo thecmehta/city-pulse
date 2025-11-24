@@ -9,8 +9,8 @@ export default function Settings() {
         vehicleCount: 0,
         thresholds: {
             traffic: { highSpeed: 0, lowSpeed: 0 },
-            pollution: { highTemp: 0, highHumidity: 0 }
-        }
+            pollution: { highTemp: 0, highHumidity: 0 },
+        },
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -18,20 +18,29 @@ export default function Settings() {
 
     useEffect(() => {
         fetch('/api/settings')
-            .then(res => res.json())
-            .then(data => {
-                setConfig(data);
+            .then((res) => res.json())
+            .then((data) => {
+                // Merge fetched data with defaults to ensure nested objects exist
+                setConfig((prev) => ({
+                    ...prev,
+                    ...data,
+                    thresholds: {
+                        ...prev.thresholds,
+                        ...(data.thresholds || {}),
+                    },
+                }));
                 setLoading(false);
             })
-            .catch(err => console.error(err));
+            .catch((err) => console.error(err));
     }, []);
 
     const updateConfig = (path, value) => {
         const keys = path.split('.');
-        setConfig(prev => {
+        setConfig((prev) => {
             const newState = { ...prev };
             let current = newState;
             for (let i = 0; i < keys.length - 1; i++) {
+                if (!current[keys[i]]) current[keys[i]] = {};
                 current = current[keys[i]];
             }
             current[keys[keys.length - 1]] = Number(value);
@@ -48,7 +57,6 @@ export default function Settings() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(config),
             });
-
             if (res.ok) {
                 setMessage({ type: 'success', text: 'Configuration saved successfully.' });
             } else {
@@ -60,11 +68,13 @@ export default function Settings() {
         setSaving(false);
     };
 
-    if (loading) return (
-        <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="w-12 h-12 border-4 border-[#4F46E5] border-t-transparent rounded-full animate-spin"></div>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="w-12 h-12 border-4 border-[#4F46E5] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -81,7 +91,7 @@ export default function Settings() {
 
                 {message && (
                     <div className={`p-4 rounded-xl mb-8 flex items-center ${message.type === 'success' ? 'bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20' : 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/20'}`}>
-                        <AlertCircle className="w-5 h-5 mr-3" />
+                        <AlertCircle className="w-5 h-3 mr-3" />
                         {message.text}
                     </div>
                 )}
@@ -96,21 +106,11 @@ export default function Settings() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Population</label>
-                                <input
-                                    type="number"
-                                    value={config.population}
-                                    onChange={(e) => updateConfig('population', e.target.value)}
-                                    className="input-field"
-                                />
+                                <input type="number" value={config.population} onChange={(e) => updateConfig('population', e.target.value)} className="input-field" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Registered Vehicles</label>
-                                <input
-                                    type="number"
-                                    value={config.vehicleCount}
-                                    onChange={(e) => updateConfig('vehicleCount', e.target.value)}
-                                    className="input-field"
-                                />
+                                <input type="number" value={config.vehicleCount} onChange={(e) => updateConfig('vehicleCount', e.target.value)} className="input-field" />
                             </div>
                         </div>
                     </div>
@@ -121,62 +121,36 @@ export default function Settings() {
                             <Sliders className="w-5 h-5 mr-2 text-[#94A3B8]" />
                             Prediction Thresholds
                         </h3>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="p-6 rounded-2xl bg-[#0F172A]/50 border border-[#334155] space-y-4">
                                 <h4 className="font-semibold text-[#4F46E5] text-sm uppercase tracking-wider">Traffic Logic</h4>
                                 <div>
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">High Speed Threshold (km/h)</label>
                                     <p className="text-xs text-[#64748B] mb-2">Speeds above this = LOW traffic</p>
-                                    <input
-                                        type="number"
-                                        value={config.thresholds.traffic.highSpeed}
-                                        onChange={(e) => updateConfig('thresholds.traffic.highSpeed', e.target.value)}
-                                        className="input-field"
-                                    />
+                                    <input type="number" value={config.thresholds.traffic.highSpeed} onChange={(e) => updateConfig('thresholds.traffic.highSpeed', e.target.value)} className="input-field" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">Low Speed Threshold (km/h)</label>
                                     <p className="text-xs text-[#64748B] mb-2">Speeds below this = HIGH traffic</p>
-                                    <input
-                                        type="number"
-                                        value={config.thresholds.traffic.lowSpeed}
-                                        onChange={(e) => updateConfig('thresholds.traffic.lowSpeed', e.target.value)}
-                                        className="input-field"
-                                    />
+                                    <input type="number" value={config.thresholds.traffic.lowSpeed} onChange={(e) => updateConfig('thresholds.traffic.lowSpeed', e.target.value)} className="input-field" />
                                 </div>
                             </div>
-
                             <div className="p-6 rounded-2xl bg-[#0F172A]/50 border border-[#334155] space-y-4">
                                 <h4 className="font-semibold text-[#EF4444] text-sm uppercase tracking-wider">Pollution Logic</h4>
                                 <div>
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">High Temp Threshold (°C)</label>
-                                    <input
-                                        type="number"
-                                        value={config.thresholds.pollution.highTemp}
-                                        onChange={(e) => updateConfig('thresholds.pollution.highTemp', e.target.value)}
-                                        className="input-field"
-                                    />
+                                    <input type="number" value={config.thresholds.pollution.highTemp} onChange={(e) => updateConfig('thresholds.pollution.highTemp', e.target.value)} className="input-field" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#94A3B8] mb-1">High Humidity Threshold (%)</label>
-                                    <input
-                                        type="number"
-                                        value={config.thresholds.pollution.highHumidity}
-                                        onChange={(e) => updateConfig('thresholds.pollution.highHumidity', e.target.value)}
-                                        className="input-field"
-                                    />
+                                    <input type="number" value={config.thresholds.pollution.highHumidity} onChange={(e) => updateConfig('thresholds.pollution.highHumidity', e.target.value)} className="input-field" />
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className="pt-6">
-                        <button
-                            onClick={handleSave}
-                            disabled={saving}
-                            className="w-full btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
+                        <button onClick={handleSave} disabled={saving} className="w-full btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
                             <Save className="w-5 h-5 mr-2" />
                             {saving ? 'Saving...' : 'Save Configuration'}
                         </button>
